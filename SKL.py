@@ -61,7 +61,6 @@ def license():
         os.mkdir(path)
     except:
         pass
-    print(path)
     
     try:
         with open(f"{path}/serial.json","r") as f:
