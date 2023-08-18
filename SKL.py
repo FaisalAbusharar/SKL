@@ -1,6 +1,9 @@
 from KeyLogger.config import newConfig, bcolors, commands_list
 import os
 import requests
+import rsa
+from base64 import b64encode
+
 
 os.system("cls")
 
@@ -23,25 +26,28 @@ def printlogo():
 
 
 
+def license():
+    printlogo()
+    print(bcolors.WARNING +  "SKL is a Licensed Product" + bcolors.WHITE + "\nIf you have " + bcolors.FAIL + "not" + bcolors.WHITE + " purchased a serial key, please contact " 
+          + bcolors.OKBLUE + "voidy6059" + bcolors.WHITE + " on discord to purchase your serial key.\n")
+    
+    serial = input("Serial key: ")
+    ## J S K V I B U
+    # JS235-SDKO3-K5FJK2-VFK3KL-IFYH5-B45F8-UY348
+    
 
-# def license():
-#     # The list with all keys.
-#     keys = requests.get("http://yourlink.com/licensekeys.txt").text
-#     # keys = ["key1", "key2", "key3"]
+    try:
+        if serial[0] == "J" and serial[6] == "S" and serial[12] == "K" and serial[19] == "V" and serial[26] == "I" and serial[32] == "B" and serial[38] == "U":
+            os.system("cls")
+        else:
+            print(bcolors.FAIL + "Invaild serial " + bcolors.WHITE + "|| please contact " + bcolors.OKBLUE + "voidy6059" + bcolors.WHITE + " to " + bcolors.OKGREEN + "purchase." + bcolors.WHITE)
+            exit()
+    except:
+        exit()
+        
 
-#     # License key from user.
-#     keyfromuser = input("License Key: ")
-
-#     for key in keys.splitlines():
-#         if key == keyfromuser:
-#             # Code when key match.
-#             return
-
-#     # Code if the key don't match.
-#     exit()
-
-# license()
-
+license()
+    
 
 print("....Welcome to SKL....\nType \"help\" for a list of commands")
 
