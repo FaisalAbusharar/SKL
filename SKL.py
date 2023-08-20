@@ -180,7 +180,8 @@ try:
             json.load(f)
 except:
         with open(f"{path}/config.json","w") as r:
-            pass
+             new = {'sender_email': 'sender', 'receiver_email': 'receiver', 'sender_password': 'password', "mode": 'mode'}
+             json.dump(new,r)
 
 JsonPath = f"{path}/config.json"
     
