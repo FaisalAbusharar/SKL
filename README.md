@@ -13,8 +13,9 @@
     <a href="#license">License</a> •
     <a href="#contact">Contact</a>
 </p>
-
-![Project Logo](./skl.png)
+<p align="center">
+    <img src="./skl.png" alt="Project Logo">
+</p>
 
 ## About
 The Simple Key Logger (SKL) is a simple keylogger implementation in Python for educational and awareness purposes. This project aims to demonstrate how keyloggers can be created and highlights the importance of cybersecurity practices.
