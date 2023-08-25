@@ -9,7 +9,7 @@ from bson.objectid import ObjectId
 
 
 # Connect to the MongoDB server
-uri = "mongodb+srv://USER_SKL_PROGRAM:2szsiET3RM0JuQnl@skl.jdigidi.mongodb.net/?retryWrites=true&w=majority"
+uri = "mongodb+srv://SKL-USER:mGKEgzZbcUPu2iwM@skl.jdigidi.mongodb.net/?retryWrites=true&w=majority"
 
 client = MongoClient(uri, server_api=ServerApi('1'))
 
